@@ -204,7 +204,7 @@ void half_free(void *mem_free){
         previousA = 1;
     }
     else if (&memory[previous] ==  mem_f){
-        location = 0;
+        location = previousRead(memory[next]);
         nextA = allocatedRead(memory[next]);
         previousA = 1;
     }
@@ -250,7 +250,6 @@ void half_free(void *mem_free){
         removeFromBucket(next);
         
         unallocate(*mem_f);
-        //printf("%u \n",allocatedRead(memory[location]));
         addToBucket(newSize, location);
     }
     else if (!previousA){
@@ -270,7 +269,6 @@ void half_free(void *mem_free){
     else{
         //printf("Coalesce Nothing\n");
         unallocate(*mem_f);
-        //printf("add to bucket\n");
         addToBucket(size, location);
     }
     
