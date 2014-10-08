@@ -208,7 +208,7 @@ void half_free(void *mem_free){
         previousA = allocatedRead(memory[previous]);
     }
     
-    location = previousRead(memory[next]);
+    //location = previousRead(memory[next]);
     
     //check for coalesce with next and previous
     if (!nextA && !previousA){
