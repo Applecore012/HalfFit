@@ -378,6 +378,7 @@ bool test_rndm_alc_free( void ) {
         rslt = false;
         printf("Memory is defraged.\n");
     } else {
+        printf("testing free point\n");
         half_free(ptr_1);
     }
     
@@ -418,7 +419,7 @@ bool test_max_alc_rand_byte( void ) {
 
 int main( void ) {
     
-    //printf( "test_max_alc=%i \n",                   test_max_alc() );
+    //printf( "*******test_max_alc=%i \n",                   test_max_alc() );
     
     //printf( "*******test_alc_free_max=%i \n",              test_alc_free_max() );
     //printf( "*******test_static_alc_free=%i \n",           test_static_alc_free() );

@@ -40,8 +40,8 @@ void half_init(){
     int i;
     //Declare Bucket With Size: 32768 Bytes
     memory[0] = 2048;
-    memory[1] = 8902;
-    memory[2] = 8902; //0b100000 = 32
+    memory[1] = 8202;
+    memory[2] = 8202; //0b100000 = 32
     //Declare an array to contain all the head pointers for each bucket
     for (i = 0; i<10; i++)
         buckets[i] = -1;
@@ -58,8 +58,7 @@ void removeFromBucket(uint32_t location){
         buckets[memory[location+1]-sizeArray] = memory[location+2];
         memory[memory[location+2]+1] = memory[location+1];
     }
-    else if (memory[location+2] >= sizeArray)
-    {
+    else if (memory[location+2] >= sizeArray){
         memory[memory[location+1]+2] = memory[location+2];
     }
     else{
@@ -100,7 +99,7 @@ void *half_alloc(unsigned int n){
     uint32_t GP;
     uint32_t mod = 0;
     
-    
+    printf("Test n: %u\n", n);
     if (n > 32763)
         return NULL;
 	//smallest bucket size is 32 so start there
@@ -121,17 +120,18 @@ void *half_alloc(unsigned int n){
             return NULL;
         i++;
     }
+    printf("testpoint\n");
     //Take the first block of the top of the bucket larger the the size to be allocated
     
 	// Check to see if amount of unallocated memory left after allocation has occurred is greater then 8 bytes (64 bits) (smallest appropriate block size)
     temp = sizeBlockRead(memory[buckets[i]]);
     
     mod = size%32;
-    if (mod == 0)
-        differnce = 0;
-    else
+    if (mod != 0){
         differnce = 32-mod;
-    size += differnce;
+        size += differnce;
+    }
+    printf("size: %u temp: %u\n", size, temp);
     if(temp - size == 0){
         temp = buckets[i];
         removeFromBucket(temp);
@@ -154,19 +154,25 @@ void *half_alloc(unsigned int n){
     }
     
     previousWrite(memory[GP], buckets[i]);
+    
     size = temp - size;
     sizeBlockWrite(memory[GP], size);
+     //Update the next pointer of the old header
+    nextWrite(memory[buckets[i]], GP);   
+
     unallocate(memory[GP]);
-    //Update the next pointer of the old header
-    nextWrite(memory[buckets[i]], GP);
+
     //Update the linked list, removing block to allocate
     temp = buckets[i];
     //Allocate the block
     allocate(memory[temp]);
     //Add the new header to linked list
+    printf("before adds and removes\n");
     removeFromBucket(temp);
+    printf("after remove\n");
     addToBucket(size, GP);
-    printf("Memory Address %u",&memory[temp+1] );
+    printf("after removes and adds\n");
+    //printf("Memory Address %u\n",&memory[temp+1] );
     return &memory[temp+1];
 }
 
@@ -214,6 +220,7 @@ void half_free(void *mem_free){
     if (!nextA && !previousA){
         printf("coalesce both\n");
         newSize = sizeBlockRead(memory[previous])+size+sizeBlockRead(memory[next]);
+        
         previousWrite(memory[nextRead(memory[next])], previous);
         nextWrite(memory[previous], nextRead(memory[next]));
         sizeBlockWrite(memory[previous], newSize);
@@ -229,11 +236,14 @@ void half_free(void *mem_free){
     else if (!nextA){
         printf("coalesce next\n");
         newSize = size+sizeBlockRead(memory[next]);
+        
         previousWrite(memory[nextRead(memory[next])], *mem_f);
         nextWrite(*mem_f, nextRead(memory[next]));
         sizeBlockWrite(*mem_f, newSize);
+        
         removeFromBucket(location);
         removeFromBucket(next);
+        
         unallocate(*mem_f);
         //printf("%u \n",allocatedRead(memory[location]));
         addToBucket(newSize, location);
@@ -241,11 +251,14 @@ void half_free(void *mem_free){
     else if (!previousA){
         printf("Coalesce Previous\n");
         newSize = size+sizeBlockRead(memory[previous]);
+        
         previousWrite(memory[next], previous);
         nextWrite(memory[previous], next);
         sizeBlockWrite(memory[previous], newSize);
+        
         removeFromBucket(location);
         removeFromBucket(previous);
+        
         unallocate(memory[previous]);
         addToBucket(newSize, previous);
     }
