@@ -1,53 +1,9 @@
-/*#include "half_fit.c"
-//#include "lpc17xx.h"
-#include <stdio.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-
-//defines for reading bitfields
-#define previousRead(ptr) ((4290772992 & ptr) >> 19) //0b11111111110000000000000000000000 = 4290772992, shift left by 22 and right by 17, 4 Byte addressable
-#define nextRead(ptr) ((4190208 & ptr) >> 9)//0b1111111111000000000000 = 4190208, shift left by 12 and right by 5, 4 Byte addressable
-#define previousReadFour(ptr) ((4290772992 & ptr) >> 19) //0b11111111110000000000000000000000 = 4290772992, shift left by 22 and right by 17, 4 Byte addressable
-#define nextReadFour(ptr) ((4190208 & ptr) >> 9)//0b1111111111000000000000 = 4190208, shift left by 12 and right by 5, 4 Byte a
-#define sizeBlockRead(ptr) ((4094 & ptr) << 4)   //0b111111111110 = 4094
-#define allocatedRead(ptr) (ptr & 1)
-
-//defines for righting bitfields
-#define previousWrite(ptr, value) ptr = (value << 19) + (4194303 & ptr) //0b1111111111111111111111 = 4194303
-#define nextWrite(ptr, value) ptr = (value << 9) + (4290777087 & ptr) //0b11111111110000000000111111111111 = 4290777087
-#define sizeBlockWrite(ptr, value) ptr = (value >> 4) + (4294963201 & ptr) //0b11111111111111111111000000000001 = 4294963201
-//#define allocate(ptr) ptr = ptr & 4294967295 //0b11111111111111111111111111111111 = 4294967295
-#define allocate(ptr) ptr = ptr | 1 //0b11111111111111111111111111111111 = 4294967295
-#define unallocate(ptr) ptr = ptr & 4294967294 //0b11111111111111111111111111111110 = 4294967294
-
-int main(){
-	half_init();
-	void* ptr5 = half_alloc(63);
-    
-	//void* ptr1 = half_alloc(240);
-	//void* ptr2 = half_alloc(24);
-	//void* ptr3 = half_alloc(1200);
-	//void* ptr4 = half_alloc(1800);
-    //printf("%u\n", ptr5);
-
-    half_free(ptr5);
-    
-    
-	//half_free(ptr1);
-	//half_free(ptr2);
-	//half_free(ptr4);
-	//half_free(ptr3);
-	return 0;
-}*/
-
-
 
 #include <stdio.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "half_fit.c"
+#include "half_fit.h"
 
 #define smlst_blk           5
 #define smlst_blk_sz  ( 1 << smlst_blk )
@@ -76,7 +32,7 @@ typedef struct pair {
     block_t first;
     block_t second;
 } pair_t;
-typedef size_t uint32_t;
+
 
 /*  Find the maximum possible allocating block
  */
@@ -87,8 +43,8 @@ size_t find_max_block( void ) {
     
     for ( i = lrgst_blk_sz; i > 0; --i ) {
         p = half_alloc( i );
-        
         if ( p != NULL ) {
+            printf("P is: %p\n", p);
             half_free( p );
             return i;
         }
@@ -199,7 +155,7 @@ bool test_static_alc_free( void ) {
     void *ptr_1, *ptr_2, *ptr_3, *ptr_4, *ptr_5, *ptr_6;
     
     half_init();
-    
+    printf("testpoint");
     max_sz = find_max_block();
     
     ptr_1 = half_alloc(1 << 5 + 1);
@@ -207,7 +163,7 @@ bool test_static_alc_free( void ) {
     
     ptr_2 = half_alloc(1 << 9 - 1);
     if (ptr_2 == NULL) return false;
-    
+    printf("testpoint");
     ptr_3 = half_alloc(1 << 5 + 1);
     if (ptr_3 == NULL) return false;
     
@@ -221,7 +177,7 @@ bool test_static_alc_free( void ) {
     
     ptr_6 = half_alloc(1);
     if (ptr_6 == NULL) return false;
-    
+    printf("testpoint");
     half_free(ptr_3);
     
     half_free(ptr_4);
@@ -284,6 +240,7 @@ bool test_static_alc_free_violation( void ) {
     
     // Checking any violation
     if ( is_violated( find_violation( blks, blks_sz ) ) ) {
+        printf("violation");
         return false;
     }
     
@@ -300,7 +257,7 @@ bool test_static_alc_free_violation( void ) {
     half_free(blks[blks_sz].ptr);
     
     alloc_blk_in_arr(blks, &blks_sz, (1 << 9));
-    
+    printf("testpoint");
     // Checking any violation
     if (is_violated(find_violation(blks, blks_sz)))
         return false;
@@ -312,6 +269,7 @@ bool test_static_alc_free_violation( void ) {
     half_free(blks[blks_sz].ptr);
     
     // Check wether all allocated memory blocks are freed.
+    printf("%u", max_sz);
     ptr_1 = half_alloc(max_sz);
     
     if ( ptr_1 == NULL ) {
@@ -439,6 +397,7 @@ bool test_max_alc_1_byte( void ) {
     
     while ( half_alloc(1) != NULL ) {
         c++;
+        printf("inside while");
     }
     
     printf("Only %d 1-Byte block can be allocated within %d addressable Bytes.\n", c, max_sz);
@@ -458,14 +417,14 @@ bool test_max_alc_rand_byte( void ) {
 
 
 int main( void ) {
-
-        printf( "test_max_alc=%i \n",                   test_max_alc() );
-        
-        printf( "test_alc_free_max=%i \n",              test_alc_free_max() );
-        printf( "test_static_alc_free=%i \n",           test_static_alc_free() );
-        printf( "test_static_alc_free_violation=%i \n", test_static_alc_free_violation() );
-        //printf( "test_rndm_alc_free=%i \n",             test_rndm_alc_free() );
-        //printf( "test_max_alc_1_byte=%i \n",            test_max_alc_1_byte() );
+    
+    //printf( "test_max_alc=%i \n",                   test_max_alc() );
+    
+    //printf( "test_alc_free_max=%i \n",              test_alc_free_max() );
+    //printf( "test_static_alc_free=%i \n",           test_static_alc_free() );
+    //printf( "test_static_alc_free_violation=%i \n", test_static_alc_free_violation() );
+    printf( "test_rndm_alc_free=%i \n",             test_rndm_alc_free() );
+    //printf( "test_max_alc_1_byte=%i \n",            test_max_alc_1_byte() );
     
     return 0;
 }

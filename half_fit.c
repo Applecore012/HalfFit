@@ -35,16 +35,6 @@ static int buckets[11] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0};
 #define allocate(ptr) ptr = ptr | 1 //0b11111111111111111111111111111111 = 4294967295
 #define unallocate(ptr) ptr = ptr & 4294967294 //0b11111111111111111111111111111110 = 4294967294
 
-void display_bucket(int bucket){
-    printf("==== Printing bucket %u ====\n", bucket );
-    uint32_t location = buckets[bucket];
-    printf("First Location: %u\n", location );
-    while (location < sizeArray){
-        printf("Location: %u\n", location);
-        location = memory[location+2];
-    }
-    printf("%s\n","==============" );
-}
 
 void half_init(){
     int i;
@@ -80,8 +70,6 @@ void removeFromBucket(uint32_t location){
 
 void addToBucket(uint32_t size, uint32_t location) {
     uint32_t i = 0;
-    uint32_t temp = size;
-    printf("Add to bucket size: %u location %u\n", size, location );
     size = size >> 5;
     while(size > 0){
         i++;
@@ -98,7 +86,6 @@ void addToBucket(uint32_t size, uint32_t location) {
         memory[location+2] = buckets[i];
         memory[buckets[i]+1] = location;
     }
-    printf("Adding size: %u to bucket: %u\n", temp, i);
     memory[location+1] = sizeArray+i;
     buckets[i] = location;
 }
@@ -109,11 +96,9 @@ void *half_alloc(unsigned int n){
     uint32_t i = 0;
     uint32_t differnce;
     uint32_t size = n+4;
-    printf("%u\n", size);
     uint32_t temp = size;
     uint32_t GP;
     uint32_t mod = 0;
-    printf("Size: %u n: %u\n", size, n);
     
     
     if (n > 32763)
@@ -140,14 +125,13 @@ void *half_alloc(unsigned int n){
     
 	// Check to see if amount of unallocated memory left after allocation has occurred is greater then 8 bytes (64 bits) (smallest appropriate block size)
     temp = sizeBlockRead(memory[buckets[i]]);
-    display_bucket(i);
+    
     mod = size%32;
     if (mod == 0)
         differnce = 0;
     else
         differnce = 32-mod;
     size += differnce;
-    printf("size: %u temp: %u\n", size, temp);
     if(temp - size == 0){
         temp = buckets[i];
         removeFromBucket(temp);
@@ -156,7 +140,7 @@ void *half_alloc(unsigned int n){
     printf("Allocating %u\n", size);
     
     GP = buckets[i] + size/4;
-    printf("Testpoint\n");
+    
     //Update size of old header
     sizeBlockWrite(memory[buckets[i]], size);
     
@@ -168,7 +152,7 @@ void *half_alloc(unsigned int n){
     else{
         nextWrite(memory[GP], nextRead(memory[buckets[i]]));
     }
-    printf("Testpoint\n");
+    
     previousWrite(memory[GP], buckets[i]);
     size = temp - size;
     sizeBlockWrite(memory[GP], size);
@@ -177,12 +161,9 @@ void *half_alloc(unsigned int n){
     nextWrite(memory[buckets[i]], GP);
     //Update the linked list, removing block to allocate
     temp = buckets[i];
-    //buckets[i] = memory[temp+1];
-    printf("Testpoint\n");
     //Allocate the block
     allocate(memory[temp]);
     //Add the new header to linked list
-    printf("Testpoint\n");
     removeFromBucket(temp);
     addToBucket(size, GP);
     printf("Memory Address %u",&memory[temp+1] );
