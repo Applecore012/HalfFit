@@ -3,7 +3,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "half_fit.h"
+#include "half_fit.c"
 
 #define smlst_blk           5
 #define smlst_blk_sz  ( 1 << smlst_blk )
@@ -420,11 +420,11 @@ int main( void ) {
     
     //printf( "test_max_alc=%i \n",                   test_max_alc() );
     
-    //printf( "test_alc_free_max=%i \n",              test_alc_free_max() );
-    //printf( "test_static_alc_free=%i \n",           test_static_alc_free() );
-    //printf( "test_static_alc_free_violation=%i \n", test_static_alc_free_violation() );
-    printf( "test_rndm_alc_free=%i \n",             test_rndm_alc_free() );
-    //printf( "test_max_alc_1_byte=%i \n",            test_max_alc_1_byte() );
+    //printf( "*******test_alc_free_max=%i \n",              test_alc_free_max() );
+    //printf( "*******test_static_alc_free=%i \n",           test_static_alc_free() );
+    //printf( "*******test_static_alc_free_violation=%i \n", test_static_alc_free_violation() );
+    printf( "*******test_rndm_alc_free=%i \n",             test_rndm_alc_free() );
+    //printf( "*******test_max_alc_1_byte=%i \n",            test_max_alc_1_byte() );
     
     return 0;
 }
