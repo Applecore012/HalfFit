@@ -188,7 +188,7 @@ void half_free(void *mem_free){
     next = nextRead(*mem_f);
     
     if (&memory[previous] ==  mem_f && &memory[next] == mem_f){
-        location = 1;
+        location = 0;
         nextA = 1;
         previousA = 1;
     }
