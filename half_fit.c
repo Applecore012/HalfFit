@@ -222,7 +222,7 @@ void half_free(void *mem_free){
         removeFromBucket(previous);
         removeFromBucket(next);
         
-        unallocate(previous);
+        unallocate(memory[previous]);
         addToBucket(newSize, previous);
     }
     //check for coalesce with next only
@@ -246,7 +246,7 @@ void half_free(void *mem_free){
         sizeBlockWrite(memory[previous], newSize);
         removeFromBucket(location);
         removeFromBucket(previous);
-        unallocate(previous);
+        unallocate(memory[previous]);
         addToBucket(newSize, previous);
     }
     else{
