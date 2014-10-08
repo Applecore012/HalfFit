@@ -419,11 +419,11 @@ bool test_max_alc_rand_byte( void ) {
 
 int main( void ) {
     
-    //printf( "*******test_max_alc=%i \n",                   test_max_alc() );
+    printf( "*******test_max_alc=%i \n",                   test_max_alc() );
     
-    //printf( "*******test_alc_free_max=%i \n",              test_alc_free_max() );
-    //printf( "*******test_static_alc_free=%i \n",           test_static_alc_free() );
-    //printf( "*******test_static_alc_free_violation=%i \n", test_static_alc_free_violation() );
+    printf( "*******test_alc_free_max=%i \n",              test_alc_free_max() );
+    printf( "*******test_static_alc_free=%i \n",           test_static_alc_free() );
+    printf( "*******test_static_alc_free_violation=%i \n", test_static_alc_free_violation() );
     printf( "*******test_rndm_alc_free=%i \n",             test_rndm_alc_free() );
     //printf( "*******test_max_alc_1_byte=%i \n",            test_max_alc_1_byte() );
     
