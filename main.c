@@ -309,7 +309,7 @@ bool test_rndm_alc_free( void ) {
     
     // 'alc_rec' stores how many times 'half_alloc' successfully returns a requested block.
     alc_rec = 0;
-    
+    int amount_allocated = 0;
     // Allocating random memory blocks
     for ( i = 0; i < RNDM_TESTS; ++i ) {
         
@@ -317,6 +317,7 @@ bool test_rndm_alc_free( void ) {
         size_t blk_sz = get_random_block_size();
         block_t blk;
         blk.ptr = half_alloc(blk_sz);
+        amount_allocated += blks_sz;
         blk.len = blk_sz;
         
         if ( blk.ptr != 0 ) {
@@ -326,7 +327,7 @@ bool test_rndm_alc_free( void ) {
             printf( "%i)The allocated %d Byte block starts from %d \n", ++line, blk.len, blk.ptr );
         }
     }
-    
+
     // Checking any violation
     if ( is_violated(find_violation(blks, blks_sz)) ) {
         return false;
@@ -371,6 +372,7 @@ bool test_rndm_alc_free( void ) {
     // All allocated memories have to be freed now.
     
     printf("%d random blocks are allocated and freed without any violation.\n", alc_rec);
+    printf("amount allocated: %d\n", amount_allocated);
     
     ptr_1 = half_alloc(max_sz);
     
