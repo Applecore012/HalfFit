@@ -44,7 +44,7 @@ size_t find_max_block( void ) {
     for ( i = lrgst_blk_sz; i > 0; --i ) {
         p = half_alloc( i );
         if ( p != NULL ) {
-            printf("P is: %p\n", p);
+            //printf("P is: %p\n", p);
             half_free( p );
             return i;
         }
@@ -155,7 +155,7 @@ bool test_static_alc_free( void ) {
     void *ptr_1, *ptr_2, *ptr_3, *ptr_4, *ptr_5, *ptr_6;
     
     half_init();
-    printf("testpoint");
+    //printf("testpoint");
     max_sz = find_max_block();
     
     ptr_1 = half_alloc(1 << 5 + 1);
@@ -163,7 +163,7 @@ bool test_static_alc_free( void ) {
     
     ptr_2 = half_alloc(1 << 9 - 1);
     if (ptr_2 == NULL) return false;
-    printf("testpoint");
+    //printf("testpoint");
     ptr_3 = half_alloc(1 << 5 + 1);
     if (ptr_3 == NULL) return false;
     
@@ -177,7 +177,7 @@ bool test_static_alc_free( void ) {
     
     ptr_6 = half_alloc(1);
     if (ptr_6 == NULL) return false;
-    printf("testpoint");
+    //printf("testpoint");
     half_free(ptr_3);
     
     half_free(ptr_4);
@@ -257,7 +257,7 @@ bool test_static_alc_free_violation( void ) {
     half_free(blks[blks_sz].ptr);
     
     alloc_blk_in_arr(blks, &blks_sz, (1 << 9));
-    printf("testpoint");
+    //printf("testpoint");
     // Checking any violation
     if (is_violated(find_violation(blks, blks_sz)))
         return false;
@@ -400,7 +400,7 @@ bool test_max_alc_1_byte( void ) {
     
     while ( half_alloc(1) != NULL ) {
         c++;
-        printf("inside while");
+        //printf("inside while");
     }
     
     printf("Only %d 1-Byte block can be allocated within %d addressable Bytes.\n", c, max_sz);
