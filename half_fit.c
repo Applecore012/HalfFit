@@ -245,7 +245,7 @@ void half_free(void *mem_free){
         nextWrite(memory[previous], next);
         sizeBlockWrite(memory[previous], newSize);
         removeFromBucket(location);
-        removeFromBucket(next);
+        removeFromBucket(previous);
         unallocate(previous);
         addToBucket(newSize, previous);
     }
