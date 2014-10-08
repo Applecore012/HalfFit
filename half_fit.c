@@ -99,14 +99,14 @@ void *half_alloc(unsigned int n){
     uint32_t GP;
     uint32_t mod = 0;
     
-    printf("Test n: %u\n", n);
+    //printf("Test n: %u\n", n);
     if (n > 32763)
         return NULL;
 	//smallest bucket size is 32 so start there
     temp = temp >> 5;
     //find the power of two (or bucket size in which size is less then
 
-    printf("testpoint\n");
+    //printf("testpoint\n");
     while(temp > 0){
         //If all the buckets are empty return null
         if (i == 10)
@@ -114,18 +114,18 @@ void *half_alloc(unsigned int n){
         i++;
         temp = temp >> 1;
     }
-    printf("testpoint\n");
-    printf("i: %u\n", i);
-    for (int j=0; j<11; j++)
-        printf("j: %d buckets[i]: %d size: %u\n",j, buckets[j], sizeBlockRead(memory[buckets[j]]));
-    printf("after for loop\n");
+    //printf("testpoint\n");
+    //printf("i: %u\n", i);
+    //for (int j=0; j<11; j++)
+    //    printf("j: %d buckets[i]: %d size: %u\n",j, buckets[j], sizeBlockRead(memory[buckets[j]]));
+    //printf("after for loop\n");
     //If larger bucket is empty keep going larger till you find a non empty bucket
     while(buckets[i] == -1){
         if (i == 10)
             return NULL;
         i++;
     }
-    printf("testpoint\n");
+    //printf("testpoint\n");
     //Take the first block of the top of the bucket larger the the size to be allocated
     
 	// Check to see if amount of unallocated memory left after allocation has occurred is greater then 8 bytes (64 bits) (smallest appropriate block size)
@@ -190,9 +190,9 @@ void half_free(void *mem_free){
     if (mem_free == NULL)
         return;
     
-    printf("%u", *mem_f);
+    //printf("%u", *mem_f);
     --mem_f;
-    printf("%u", *mem_f);
+    //printf("%u", *mem_f);
     
     size = sizeBlockRead(*mem_f);
     previous = previousRead(*mem_f);
@@ -230,7 +230,7 @@ void half_free(void *mem_free){
         nextWrite(memory[previous], nextRead(memory[next]));
         sizeBlockWrite(memory[previous], newSize);
         
-        removeFromBucket(location);
+        //removeFromBucket(location);
         removeFromBucket(previous);
         removeFromBucket(next);
         
@@ -246,7 +246,7 @@ void half_free(void *mem_free){
         nextWrite(*mem_f, nextRead(memory[next]));
         sizeBlockWrite(*mem_f, newSize);
         
-        removeFromBucket(location);
+        //removeFromBucket(location);
         removeFromBucket(next);
         
         unallocate(*mem_f);
@@ -260,7 +260,7 @@ void half_free(void *mem_free){
         nextWrite(memory[previous], next);
         sizeBlockWrite(memory[previous], newSize);
         
-        removeFromBucket(location);
+        //removeFromBucket(location);
         removeFromBucket(previous);
         
         unallocate(memory[previous]);
