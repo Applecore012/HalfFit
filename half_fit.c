@@ -4,8 +4,8 @@
 
 const uint32_t sizeArray = 8192;//8192x4=32768
 
-//Declare Bucket With Size: 32768 Bytes
-uint32_t memory[8192] = {2048, 8192+10, 8192+10}; //0b100000 = 32
+//Declare Bucket With Size: 32768 Bytes}
+uint32_t memory[8192] = {2048, 0x200A200A}; //0b100000 = 32
 //Declare an array to contain all the head pointers for each bucket
 static int buckets[11] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0};
 
@@ -46,8 +46,8 @@ void half_init(){
     int i;
     //Declare Bucket With Size: 32768 Bytes
     memory[0] = 2048;
-    memory[1] = 8202;
-    memory[2] = 8202; //0b100000 = 32
+    memory[1] = 0x200A200A;
+    //memory[2] = 8202; //0b100000 = 32
     //Declare an array to contain all the head pointers for each bucket
     for (i = 0; i<10; i++)
         buckets[i] = -1;

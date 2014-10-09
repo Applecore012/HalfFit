@@ -311,6 +311,9 @@ bool test_rndm_alc_free( void ) {
     alc_rec = 0;
     int amount_allocated = 0;
     // Allocating random memory blocks
+    printf("blank\n");
+    printf("blank\n");
+
     for ( i = 0; i < RNDM_TESTS; ++i ) {
         
         // Making a new memory block and storing its pointer in the array
