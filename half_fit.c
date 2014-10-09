@@ -35,8 +35,10 @@ static int buckets[11] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0};
 #define unallocate(ptr) ptr = ptr & 4294967294 //0b11111111111111111111111111111110 = 4294967294
 
 //linked list defines
-
-#define nextListWrite(ptr, value) ptr[1] = (value << 16) + (0xFFFF0000 & ptr)
+#define nextListRead(ptr) (memory[ptr+1] & 0x0000FFFF)
+#define previousListRead(ptr) ((memory[ptr+1] & 0xFFFF0000) >> 16)
+#define nextListWrite(ptr, value) memory[ptr+1] = (value) + (0xFFFF0000 & memory[ptr+1])
+#define previousListWrite(ptr, value) memory[ptr+1] = ((value) << 16) + (0x0000FFFF & memory[ptr+1])
 
 
 
@@ -55,19 +57,23 @@ void half_init(){
 
 
 void removeFromBucket(uint32_t location){
-    if (memory[location+1] >= sizeArray && memory[location+2] >= sizeArray){
-        buckets[memory[location+1]-sizeArray] = -1; //sizeArray + 10
+    
+    uint32_t previous = previousListRead(location);
+    uint32_t next = nextListRead(location);
+
+    if (previous >= sizeArray && next >= sizeArray){
+        buckets[previous-sizeArray] = -1; //sizeArray + 10
     }
-    else if (memory[location+1] >= sizeArray){
-        buckets[memory[location+1]-sizeArray] = memory[location+2];
-        memory[memory[location+2]+1] = memory[location+1];
+    else if (previous >= sizeArray){
+        buckets[previous-sizeArray] = next;
+        previousListWrite(next, previous); //memory[memory[location+2]+1] = memory[location+1];
     }
-    else if (memory[location+2] >= sizeArray){
-        memory[memory[location+1]+2] = memory[location+2];
+    else if (next >= sizeArray){
+        nextListWrite(previous, next); //memory[memory[location+1]+2] = memory[location+2];
     }
     else{
-        memory[memory[location+1]+2] = memory[location+2];
-        memory[memory[location+2]+1] = memory[location+1];
+        nextListWrite(previous, next); //memory[memory[location+1]+2] = memory[location+2];
+        previousListWrite(next, previous); //memory[memory[location+2]+1] = memory[location+1];
     }
 }
 
@@ -83,13 +89,13 @@ void addToBucket(uint32_t size, uint32_t location) {
     //printf("i: %u\n", i );
     
     if (buckets[i] < 0){
-        memory[location+2] = sizeArray+i;
+        nextListWrite(location, sizeArray+i); //memory[location+2] = sizeArray+i;
     }
     else{
-        memory[location+2] = buckets[i];
-        memory[buckets[i]+1] = location;
+        nextListWrite(location, buckets[i]); //memory[location+2] = buckets[i];
+        previousListWrite(buckets[i], location);//memory[buckets[i]+1] = location;
     }
-    memory[location+1] = sizeArray+i;
+    previousListWrite(location, sizeArray+i); //memory[location+1] = sizeArray+i;
     buckets[i] = location;
 }
 
