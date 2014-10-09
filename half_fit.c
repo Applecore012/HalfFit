@@ -31,9 +31,13 @@ static int buckets[11] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0};
 #define previousWrite(ptr, value) ptr = (value << 19) + (4194303 & ptr) //0b1111111111111111111111 = 4194303
 #define nextWrite(ptr, value) ptr = (value << 9) + (4290777087 & ptr) //0b11111111110000000000111111111111 = 4290777087
 #define sizeBlockWrite(ptr, value) ptr = (value >> 4) + (4294963201 & ptr) //0b11111111111111111111000000000001 = 4294963201
-//#define allocate(ptr) ptr = ptr & 4294967295 //0b11111111111111111111111111111111 = 4294967295
 #define allocate(ptr) ptr = ptr | 1 //0b11111111111111111111111111111111 = 4294967295
 #define unallocate(ptr) ptr = ptr & 4294967294 //0b11111111111111111111111111111110 = 4294967294
+
+//linked list defines
+
+#define nextListWrite(ptr, value) ptr[1] = (value << 16) + (0xFFFF0000 & ptr)
+
 
 
 void half_init(){
