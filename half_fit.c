@@ -143,17 +143,16 @@ void *half_alloc(unsigned int n){
     
     mod = size%32;
     if (mod != 0){
-        differnce = 32-mod;
-        size += differnce;
+        size += 32-mod;
     }
     //printf("size: %u temp: %u\n", size, temp);
     if(temp - size == 0){
         temp = buckets[i];
+        allocate(memory[temp]);
         removeFromBucket(temp);
         return (void *)&memory[temp+1];
     }
     //printf("Allocating %u\n", size);
-    
     GP = buckets[i] + size/4;
     
     //Update size of old header
@@ -172,7 +171,7 @@ void *half_alloc(unsigned int n){
     
     size = temp - size;
     sizeBlockWrite(memory[GP], size);
-     //Update the next pointer of the old header
+    //Update the next pointer of the old header
     nextWrite(memory[buckets[i]], GP);   
 
     unallocate(memory[GP]);
