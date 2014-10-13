@@ -27,7 +27,7 @@ static int buckets[11] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0};
 #define sizeBlockRead(ptr) ((4094 & ptr) << 4)   //0b111111111110 = 4094
 #define allocatedRead(ptr) (ptr & 1)
 
-//defines for righting bitfields
+//defines for writing bitfields
 #define previousWrite(ptr, value) ptr = (value << 19) + (4194303 & ptr) //0b1111111111111111111111 = 4194303
 #define nextWrite(ptr, value) ptr = (value << 9) + (4290777087 & ptr) //0b11111111110000000000111111111111 = 4290777087
 #define sizeBlockWrite(ptr, value) ptr = (value >> 4) + (4294963201 & ptr) //0b11111111111111111111000000000001 = 4294963201
@@ -60,7 +60,7 @@ void removeFromBucket(uint32_t location){
     
     uint32_t previous = previousListRead(location);
     uint32_t next = nextListRead(location);
-
+    
     if (previous >= sizeArray && next >= sizeArray){
         buckets[previous-sizeArray] = -1; //sizeArray + 10
     }
@@ -84,9 +84,8 @@ void addToBucket(uint32_t size, uint32_t location) {
         i++;
         size = size >> 1;
     }
-    //printf("i: %u\n", i );
+    
     i--;
-    //printf("i: %u\n", i );
     
     if (buckets[i] < 0){
         nextListWrite(location, sizeArray+i); //memory[location+2] = sizeArray+i;
@@ -109,14 +108,14 @@ void *half_alloc(unsigned int n){
     uint32_t GP;
     uint32_t mod = 0;
     
-    //printf("Test n: %u\n", n);
     if (n > 32763)
         return NULL;
+    
 	//smallest bucket size is 32 so start there
+    
     temp = temp >> 5;
     //find the power of two (or bucket size in which size is less then
-
-    //printf("testpoint\n");
+    
     while(temp > 0){
         //If all the buckets are empty return null
         if (i == 10)
@@ -124,35 +123,31 @@ void *half_alloc(unsigned int n){
         i++;
         temp = temp >> 1;
     }
-    //printf("testpoint\n");
-    //printf("i: %u\n", i);
-    //for (int j=0; j<11; j++)
-    //    printf("j: %d buckets[i]: %d size: %u\n",j, buckets[j], sizeBlockRead(memory[buckets[j]]));
-    //printf("after for loop\n");
+    
     //If larger bucket is empty keep going larger till you find a non empty bucket
     while(buckets[i] == -1){
         if (i == 10)
             return NULL;
         i++;
     }
-    //printf("testpoint\n");
     //Take the first block of the top of the bucket larger the the size to be allocated
     
 	// Check to see if amount of unallocated memory left after allocation has occurred is greater then 8 bytes (64 bits) (smallest appropriate block size)
+    testVar =memory[buckets[i]];
     temp = sizeBlockRead(memory[buckets[i]]);
     
     mod = size%32;
     if (mod != 0){
         size += 32-mod;
     }
-    //printf("size: %u temp: %u\n", size, temp);
-    if(temp - size == 0){
+    
+    if(temp - size <= 32){
         temp = buckets[i];
         allocate(memory[temp]);
         removeFromBucket(temp);
         return (void *)&memory[temp+1];
     }
-    //printf("Allocating %u\n", size);
+    
     GP = buckets[i] + size/4;
     
     //Update size of old header
@@ -172,21 +167,17 @@ void *half_alloc(unsigned int n){
     size = temp - size;
     sizeBlockWrite(memory[GP], size);
     //Update the next pointer of the old header
-    nextWrite(memory[buckets[i]], GP);   
-
+    nextWrite(memory[buckets[i]], GP);
+    
     unallocate(memory[GP]);
-
+    
     //Update the linked list, removing block to allocate
     temp = buckets[i];
     //Allocate the block
     allocate(memory[temp]);
     //Add the new header to linked list
-    //printf("before adds and removes\n");
     removeFromBucket(temp);
-    //printf("after remove\n");
     addToBucket(size, GP);
-    //printf("after removes and adds\n");
-    //printf("Memory Address %u\n",&memory[temp+1] );
     return &memory[temp+1];
 }
 
@@ -198,10 +189,7 @@ void half_free(void *mem_free){
     
     if (mem_free == NULL)
         return;
-    
-    //printf("%u", *mem_f);
     --mem_f;
-    //printf("%u", *mem_f);
     
     size = sizeBlockRead(*mem_f);
     previous = previousRead(*mem_f);
@@ -228,57 +216,42 @@ void half_free(void *mem_free){
         previousA = allocatedRead(memory[previous]);
     }
     
-    //location = previousRead(memory[next]);
-    
     //check for coalesce with next and previous
     if (!nextA && !previousA){
-        //printf("coalesce both\n");
         newSize = sizeBlockRead(memory[previous])+size+sizeBlockRead(memory[next]);
-        
         previousWrite(memory[nextRead(memory[next])], previous);
         nextWrite(memory[previous], nextRead(memory[next]));
         sizeBlockWrite(memory[previous], newSize);
-        
-        //removeFromBucket(location);
         removeFromBucket(previous);
         removeFromBucket(next);
-        
-        unallocate(memory[previous]);
         addToBucket(newSize, previous);
+        unallocate(*mem_f);
     }
+    
     //check for coalesce with next only
     else if (!nextA){
-        //printf("coalesce next\n");
         newSize = size+sizeBlockRead(memory[next]);
-        
         previousWrite(memory[nextRead(memory[next])], location);
         nextWrite(*mem_f, nextRead(memory[next]));
-        sizeBlockWrite(*mem_f, newSize);
-        
-        //removeFromBucket(location);
+        sizeBlockWrite(memory[location], newSize);
         removeFromBucket(next);
-        
-        unallocate(*mem_f);
         addToBucket(newSize, location);
+        unallocate(*mem_f);
     }
+    // Coalesce Previous
     else if (!previousA){
-        //printf("Coalesce Previous\n");
         newSize = size+sizeBlockRead(memory[previous]);
-        
         previousWrite(memory[next], previous);
         nextWrite(memory[previous], next);
         sizeBlockWrite(memory[previous], newSize);
-        
-        //removeFromBucket(location);
         removeFromBucket(previous);
-        
-        unallocate(memory[previous]);
         addToBucket(newSize, previous);
-    }
-    else{
-        //printf("Coalesce Nothing\n");
         unallocate(*mem_f);
+    }
+    //Coalesce nothing
+    else{
         addToBucket(size, location);
+        unallocate(*mem_f);
     }
     
 }
