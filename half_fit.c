@@ -55,7 +55,6 @@ void half_init(){
     return;
 }
 
-
 void removeFromBucket(uint32_t location){
     
     uint32_t previous = previousListRead(location);
@@ -133,7 +132,6 @@ void *half_alloc(unsigned int n){
     //Take the first block of the top of the bucket larger the the size to be allocated
     
 	// Check to see if amount of unallocated memory left after allocation has occurred is greater then 8 bytes (64 bits) (smallest appropriate block size)
-    testVar =memory[buckets[i]];
     temp = sizeBlockRead(memory[buckets[i]]);
     
     mod = size%32;
@@ -145,7 +143,7 @@ void *half_alloc(unsigned int n){
         temp = buckets[i];
         allocate(memory[temp]);
         removeFromBucket(temp);
-        return (void *)&memory[temp+1];
+        return &memory[temp+1];
     }
     
     GP = buckets[i] + size/4;
@@ -155,28 +153,27 @@ void *half_alloc(unsigned int n){
     
     //Create new header
     mod = nextRead(memory[buckets[i]]);
+    size = temp - size;
     if (mod == buckets[i]){
         nextWrite(memory[GP], GP);
     }
     else{
         nextWrite(memory[GP], nextRead(memory[buckets[i]]));
     }
-    
+    sizeBlockWrite(memory[GP], size);   
     previousWrite(memory[GP], buckets[i]);
-    
-    size = temp - size;
-    sizeBlockWrite(memory[GP], size);
+    unallocate(memory[GP]);   
+
     //Update the next pointer of the old header
     nextWrite(memory[buckets[i]], GP);
-    
-    unallocate(memory[GP]);
-    
-    //Update the linked list, removing block to allocate
+
     temp = buckets[i];
+    
     //Allocate the block
     allocate(memory[temp]);
-    //Add the new header to linked list
     removeFromBucket(temp);
+
+    //Add the new header to linked list
     addToBucket(size, GP);
     return &memory[temp+1];
 }
@@ -215,7 +212,6 @@ void half_free(void *mem_free){
         nextA = allocatedRead(memory[next]);
         previousA = allocatedRead(memory[previous]);
     }
-    
     //check for coalesce with next and previous
     if (!nextA && !previousA){
         newSize = sizeBlockRead(memory[previous])+size+sizeBlockRead(memory[next]);
@@ -225,9 +221,7 @@ void half_free(void *mem_free){
         removeFromBucket(previous);
         removeFromBucket(next);
         addToBucket(newSize, previous);
-        unallocate(*mem_f);
     }
-    
     //check for coalesce with next only
     else if (!nextA){
         newSize = size+sizeBlockRead(memory[next]);
@@ -246,7 +240,6 @@ void half_free(void *mem_free){
         sizeBlockWrite(memory[previous], newSize);
         removeFromBucket(previous);
         addToBucket(newSize, previous);
-        unallocate(*mem_f);
     }
     //Coalesce nothing
     else{
